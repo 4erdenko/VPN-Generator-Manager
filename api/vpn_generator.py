@@ -9,7 +9,7 @@ def get_token():
     headers_token = {
         'Accept': 'application/json, text/plain, */*',
     }
-    response_token = httpx.post('https://vpn.works/token',
+    response_token = httpx.post('https://w02s50ss63ae.vpn.works/token',
                                 headers=headers_token)
     token = response_token.json().get('Token')
     return token
@@ -23,7 +23,7 @@ def get_user():
         'Accept': 'application/json, text/plain, */*',
         'Authorization': f'Bearer {bearer_token}',
     }
-    response_user = httpx.get('https://vpn.works/user', headers=headers_user)
+    response_user = httpx.get('https://w02s50ss63ae.vpn.works/user', headers=headers_user)
     return response_user.json()
 
 
@@ -46,7 +46,7 @@ def make_config():
     }
 
     response_config = httpx.post(
-        'https://vpn.works/user', headers=headers_config
+        'https://w02s50ss63ae.vpn.works/user', headers=headers_config
     )
     content_disposition = response_config.headers.get('Content-Disposition')
     filename = re.findall("filename\*=utf-8''([^;]*)",
