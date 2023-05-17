@@ -1,15 +1,30 @@
 import os
-from datetime import datetime, timedelta
-from pytz import timezone
-import aiogram
-from aiogram.dispatcher.filters import Text
+from datetime import datetime
 
-from api.vpn_generator import make_config, get_user, shorten_name
+import aiogram
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import Text
+from aiogram.dispatcher.filters.state import StatesGroup, State
+from aiogram.types import ParseMode
+from pytz import timezone
+
+from api.vpn_generator import (
+    make_config,
+    get_user,
+    shorten_name,
+    delete_user,
+    get_user_id_by_name,
+)
 from config import BOT_API, CHAT_ID
 from telegram.keyboards import main_keyboard
 
-bot = aiogram.Bot(token=BOT_API)
-dp = aiogram.Dispatcher(bot)
+bot = aiogram.Bot(token=BOT_API, parse_mode=ParseMode.HTML)
+dp = aiogram.Dispatcher(bot, storage=MemoryStorage())
+
+
+class DeleteUserState(StatesGroup):
+    waiting_for_user_id = State()
 
 
 @dp.message_handler(commands=['start'])
@@ -42,20 +57,38 @@ async def get_users(message: aiogram.types.Message):
             last_visit = last_visit.strftime('%Y-%m-%d %H:%M:%S')
         else:
             last_visit = ''
+        user_id = user.get('UserID')
         month_gb_quota = user.get('MonthlyQuotaRemainingGB')
         problems = user.get('Problems')
         status = user.get('Status')
         user_name = shorten_name(user.get('UserName'))
         status_icon = '🟢' if status == 'green' else '🔴'
         problems_string = f'⛔: {problems} ' if problems else ''
-        time_string = f'🕐: {last_visit}\n\n' if last_visit else '\n'
+        time_string = f'🕐: {last_visit}\n' if last_visit else ''
 
         result_message = (
             f'{status_icon} : {user_name} '
             f'{problems_string}'
             f'🔃: {month_gb_quota} GB\n'
-            f'{time_string}'
+            f'{time_string}\n'
         )
 
         result.append(result_message)
     await message.answer(text=''.join(result))
+
+
+@dp.message_handler(Text(equals='❌ Delete user'))
+async def start_delete_user(message: aiogram.types.Message):
+    await message.answer('Enter user ID')
+    await DeleteUserState.waiting_for_user_id.set()
+
+
+@dp.message_handler(state=DeleteUserState.waiting_for_user_id)
+async def delete_user_id(message: aiogram.types.Message, state: FSMContext):
+    user_id = get_user_id_by_name(message.text)
+    if user_id and delete_user(user_id):
+        await message.answer('User deleted')
+    else:
+        await message.answer('User not found')
+    await state.reset_state(with_data=True)
+    await state.finish()
