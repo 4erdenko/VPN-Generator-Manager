@@ -68,7 +68,7 @@ async def get_users(message: aiogram.types.Message):
         status_icon = '🟩' if status == 'green' else '🟥'
         problems_string = f'⛔: {problems} ' if problems else ''
         time_string = (f'<b>Last enter:</b> <code>{last_visit}</code>' if
-                       last_visit else '')
+                       last_visit else '<b>Last enter:</b>')
 
         result_message = (
             f'{status_icon} :<strong>{user_name}</strong> '
