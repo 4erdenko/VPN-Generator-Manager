@@ -61,17 +61,17 @@ async def get_users(message: aiogram.types.Message):
             last_visit = last_visit.strftime('%Y-%m-%d %H:%M:%S')
         else:
             last_visit = ''
-        user_id = user.get('UserID')
         month_gb_quota = user.get('MonthlyQuotaRemainingGB')
         problems = user.get('Problems')
         status = user.get('Status')
         user_name = shorten_name(user.get('UserName'))
-        status_icon = '🟢' if status == 'green' else '🔴'
+        status_icon = '🟩' if status == 'green' else '🟥'
         problems_string = f'⛔: {problems} ' if problems else ''
-        time_string = f'<b>Last enter:</b> {last_visit}' if last_visit else ''
+        time_string = (f'<b>Last enter:</b> <code>{last_visit}</code' if
+                       last_visit else '')
 
         result_message = (
-            f'{status_icon} : {user_name} '
+            f'{status_icon} :<strong>{user_name}</strong> '
             f'{problems_string}'
             f'🔃: <code>{month_gb_quota} GB</code>\n'
             f'{time_string}\n'
