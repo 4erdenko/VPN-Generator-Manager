@@ -46,36 +46,37 @@ async def get_config(message: aiogram.types.Message):
 
 @dp.message_handler(Text(equals='📝 Get users'))
 async def get_users(message: aiogram.types.Message):
-    user_list = get_user()
-    result = []
     try:
-        for user in user_list:
-            last_visit = user.get('LastVisitHour')
-            if last_visit is not None:
-                last_visit = datetime.strptime(last_visit, '%Y-%m-%dT%H:%M:%S.%fZ')
-                last_visit = last_visit.replace(tzinfo=timezone('UTC'))
-                last_visit = last_visit.astimezone(timezone('Europe/Moscow'))
-                last_visit = last_visit.strftime('%Y-%m-%d %H:%M:%S')
-            else:
-                last_visit = ''
-            user_id = user.get('UserID')
-            month_gb_quota = user.get('MonthlyQuotaRemainingGB')
-            problems = user.get('Problems')
-            status = user.get('Status')
-            user_name = shorten_name(user.get('UserName'))
-            status_icon = '🟢' if status == 'green' else '🔴'
-            problems_string = f'⛔: {problems} ' if problems else ''
-            time_string = f'🕐: {last_visit}\n' if last_visit else ''
-
-            result_message = (
-                f'{status_icon} : {user_name} '
-                f'{problems_string}'
-                f'🔃: {month_gb_quota} GB\n'
-                f'{time_string}\n'
-                f'---------------------\n'
-            )
+        user_list = get_user()
     except Exception as e:
-        result_message = f'Error: while getting users: {e}'
+        await message.answer(text=f'Error while getting users: {e}')
+        return
+    result = []
+    for user in user_list:
+        last_visit = user.get('LastVisitHour')
+        if last_visit is not None:
+            last_visit = datetime.strptime(last_visit, '%Y-%m-%dT%H:%M:%S.%fZ')
+            last_visit = last_visit.replace(tzinfo=timezone('UTC'))
+            last_visit = last_visit.astimezone(timezone('Europe/Moscow'))
+            last_visit = last_visit.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            last_visit = ''
+        user_id = user.get('UserID')
+        month_gb_quota = user.get('MonthlyQuotaRemainingGB')
+        problems = user.get('Problems')
+        status = user.get('Status')
+        user_name = shorten_name(user.get('UserName'))
+        status_icon = '🟢' if status == 'green' else '🔴'
+        problems_string = f'⛔: {problems} ' if problems else ''
+        time_string = f'🕐: {last_visit}\n' if last_visit else ''
+
+        result_message = (
+            f'{status_icon} : {user_name} '
+            f'{problems_string}'
+            f'🔃: {month_gb_quota} GB\n'
+            f'{time_string}\n'
+        )
+
         result.append(result_message)
     await message.answer(text=''.join(result))
 
@@ -91,13 +92,10 @@ async def start_delete_user(message: aiogram.types.Message):
 
 @dp.message_handler(state=DeleteUserState.waiting_for_user_id)
 async def delete_user_id(message: aiogram.types.Message, state: FSMContext):
-    try:
-        user_id = get_user_id_by_name(message.text)
-        if user_id and delete_user(user_id):
-            await message.answer('User deleted')
-        else:
-            await message.answer('User not found')
-    except Exception as e:
-        await message.answer(f'Error: while deleting user: {e}')
+    user_id = get_user_id_by_name(message.text)
+    if user_id and delete_user(user_id):
+        await message.answer('User deleted')
+    else:
+        await message.answer('User not found')
     await state.reset_state(with_data=True)
     await state.finish()
