@@ -75,6 +75,7 @@ async def get_users(message: aiogram.types.Message):
             f'{problems_string}'
             f'🔃: {month_gb_quota} GB\n'
             f'{time_string}\n'
+            f'_______________________\n'
         )
 
         result.append(result_message)
