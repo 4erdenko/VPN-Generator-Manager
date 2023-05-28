@@ -23,7 +23,7 @@ services:
 
   telegram_bot:
     build:
-      context: ./MischievousBednorz
+      context: .
     container_name: TG_BOT
     restart: unless-stopped
     network_mode: service:wireguard
