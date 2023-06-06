@@ -47,33 +47,33 @@ jobs:
       - name: Stop Docker container
         run: docker compose down
 
-#  deploy:
-#    needs: build-test
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v2
-#
-#      - name: Copy code via ssh
-#        uses: appleboy/scp-action@master
-#        with:
-#          host: ${{ secrets.HOST }}
-#          username: ${{ secrets.USER }}
-#          key: ${{ secrets.SSH_KEY }}
-#          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-#          source: "."
-#          target: "/home/ubuntu/telegram_bots/bednorz"
-#
-#      - name: Executing remote ssh commands to deploy
-#        uses: appleboy/ssh-action@master
-#        with:
-#          host: ${{ secrets.HOST }}
-#          username: ${{ secrets.USER }}
-#          key: ${{ secrets.SSH_KEY }}
-#          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-#          script: |
-#            cd /home/ubuntu/telegram_bots/bednorz
-#            sudo docker-compose down
-#            sudo docker-compose up -d
-#            sudo docker image prune -f
+  deploy:
+    needs: build-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Copy code via ssh
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          source: "."
+          target: "/home/ubuntu/telegram_bots/bednorz"
+
+      - name: Executing remote ssh commands to deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            cd /home/ubuntu/telegram_bots/bednorz
+            sudo docker compose down
+            sudo docker compose up -d
+            sudo docker image prune -f
