@@ -56,10 +56,12 @@ def make_config():
         response_config = httpx.post(
             'https://w02s50ss63ae.vpn.works/user', headers=headers_config
         )
-        content_disposition = response_config.headers.get('Content-Disposition')
-        filename = re.findall("filename\*=utf-8''([^;]*)", content_disposition)[
-            0
-        ].strip()
+        content_disposition = response_config.headers.get(
+            'Content-Disposition'
+        )
+        filename = re.findall(
+            r"filename\*=utf-8''([^;]*)", content_disposition
+        )[0].strip()
     except Exception as error:
         return f'Error when trying to make config: {error}'
     if filename:
@@ -90,7 +92,8 @@ def delete_user(UserID):
             'Authorization': f'Bearer {bearer_token}',
         }
         response_delete = httpx.delete(
-            f'https://w02s50ss63ae.vpn.works/user/{UserID}', headers=headers_delete
+            f'https://w02s50ss63ae.vpn.works/user/{UserID}',
+            headers=headers_delete,
         )
     except Exception as error:
         return f'Error when trying to delete user: {error}'

@@ -5,17 +5,12 @@ import aiogram
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
-from aiogram.dispatcher.filters.state import StatesGroup, State
+from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode
 from pytz import timezone
 
-from api.vpn_generator import (
-    make_config,
-    get_user,
-    shorten_name,
-    delete_user,
-    get_user_id_by_name,
-)
+from api.vpn_generator import (delete_user, get_user, get_user_id_by_name,
+                               make_config, shorten_name)
 from config import BOT_API, CHAT_ID
 from telegram.keyboards import main_keyboard
 

@@ -1,4 +1,4 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 
 main_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
 main_keyboard.add(KeyboardButton(text='🔐 Make config'), '📝 Get users')
