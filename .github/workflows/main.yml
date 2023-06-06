@@ -37,11 +37,12 @@ jobs:
       - name: Build and run Docker container
         run: |
           docker compose up -d
-          docker compose ls
-          sleep 10
+          sleep 20
 
       - name: Check Docker logs
-        run: docker compose logs
+        run: |
+          docker compose ls
+          docker compose logs
 
       - name: Stop Docker container
         run: docker compose down
