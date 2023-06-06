@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up Docker
-        uses: docker/setup-docker-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Build and run Docker container
         run: |
