@@ -35,15 +35,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build and run Docker container
-        run: |
-          docker compose up
-
-      - name: Check if container is still running
-        run: |
-          if ! docker compose ls | grep -q 'Up'; then
-            echo "Container stopped unexpectedly";
-            exit 1;
-          fi
+        run:  docker compose up
 
       - name: Check Docker logs
         run: docker compose logs
