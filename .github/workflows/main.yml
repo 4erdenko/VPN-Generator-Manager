@@ -40,6 +40,10 @@ jobs:
         run: |
           echo "BOT_API=${BOT_API}" >> .env
           echo "CHAT_ID=${CHAT_ID}" >> .env
+          mkdir wireguard
+          cd wireguard
+          echo "${{ secrets.WG0_CONF }}" > wg0.conf
+          cd ..
           docker compose up -d
           sleep 20
       - name: Verify Docker Images
