@@ -34,6 +34,9 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build and run Docker container
+        env:
+          BOT_API: ${{ secrets.BOT_API_TEST }}
+          CHAT_ID: 123456789
         run: |
           docker compose up -d
           sleep 20
@@ -103,6 +106,7 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             set -e
+            mkdir wireguard
             cd ${{ secrets.PROJECT_PATH }}/wireguard
             rm -rf wg0.conf
             echo "${{ secrets.WG0_CONF }}" > wg0.conf
