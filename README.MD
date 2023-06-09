@@ -17,7 +17,7 @@ The bot runs inside a Docker container, and it can be automatically deployed usi
 - Receive notifications about server status
 - Use either as a standalone application or inside a Docker container
 
-![Bot Demo](https://i.imgur.com/XmZnisG.png)
+![Bot Demo](https://i.imgur.com/G0p6rmI.png)
 
 ## Requirements
 

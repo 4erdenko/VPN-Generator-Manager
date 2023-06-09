@@ -3,7 +3,7 @@ from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 # Main keyboard
 main_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
 """
-main_keyboard: ReplyKeyboardMarkup object for the bot's main menu. 
+main_keyboard: ReplyKeyboardMarkup object for the bots main menu.
 
 This keyboard contains three options:
 1. Make config - To make a configuration.
