@@ -241,6 +241,4 @@ cython_debug/
 output
 coredns
 templates
-wg0.conf
-*/wg0.conf
 *.conf
