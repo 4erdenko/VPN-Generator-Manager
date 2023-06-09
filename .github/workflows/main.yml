@@ -36,7 +36,7 @@ jobs:
       - name: Build and run Docker container
         env:
           BOT_API: ${{ secrets.BOT_API_TEST }}
-          CHAT_ID: 123456789
+          CHAT_ID: '123456789'
         run: |
           docker compose up -d
           sleep 20
@@ -106,9 +106,9 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             set -e
+            cd ${{ secrets.PROJECT_PATH }}
             mkdir wireguard
-            cd ${{ secrets.PROJECT_PATH }}/wireguard
-            rm -rf wg0.conf
+            cd wireguard
             echo "${{ secrets.WG0_CONF }}" > wg0.conf
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
@@ -120,6 +120,5 @@ jobs:
           script: |
             set -e
             cd ${{ secrets.PROJECT_PATH }}
-            sudo docker compose down
             sudo docker compose up -d
             sudo docker image prune -a -f
