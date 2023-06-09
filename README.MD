@@ -89,6 +89,7 @@ You can also set up automatic deployment of your bot using the provided GitHub A
 - `SSH_PASSPHRASE`: The passphrase for your SSH key, if any.
 - `PROJECT_PATH`: The path on your server where the bot will be deployed.
 - `BOT_API`: Your Telegram bot API token.
+- `BOT_API_TEST`: Bot API for tests in pipeline.
 - `CHAT_ID`: The chat ID where your bot will operate.
 - `START_MSG`: The start message for your bot.
 - `WG0_CONF`: The content of your `wg0.conf` file.
