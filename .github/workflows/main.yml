@@ -35,7 +35,7 @@ jobs:
 
       - name: Build and run Docker container
         run: |
-            docker compose up -d --build --env-file <(echo "BOT_API=${BOT_API_TEST}"; echo "CHAT_ID='${CHAT_ID}'")
+          docker compose up -d --build --env-file <(echo "BOT_API=${BOT_API_TEST}"; echo "CHAT_ID='${CHAT_ID}'")
           sleep 20
       - name: Verify Docker Images
         run: docker images
