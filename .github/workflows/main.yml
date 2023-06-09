@@ -26,7 +26,6 @@ jobs:
 
   build-test:
     runs-on: ubuntu-latest
-    needs: flake8
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -38,14 +37,17 @@ jobs:
         run: |
           docker compose up -d
           sleep 20
-
+      - name: Verify Docker Images
+        run: docker images
       - name: Check Docker logs
         run: |
           docker compose ls
           docker compose logs
 
       - name: Stop Docker container
-        run: docker compose down
+        run: |
+          set -e
+          docker compose down
 
   deploy:
     needs: build-test
@@ -63,7 +65,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           source: "."
-          target: "/home/ubuntu/telegram_bots/bednorz"
+          target: "${{ secrets.PROJECT_PATH }}"
       - name: Create .env file and fill it with Github secrets
         uses: appleboy/ssh-action@master
         with:
@@ -72,11 +74,24 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
-            cd /home/ubuntu/telegram_bots/bednorz
+            set -e
+            cd ${{ secrets.PROJECT_PATH }}
             rm -rf .env
             echo BOT_API=${{ secrets.BOT_API }} >> .env
             echo CHAT_ID=${{ secrets.CHAT_ID }} >> .env
             echo START_MSG=${{ secrets.START_MSG }} >> .env
+      - name: Create wg0.conf file
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            set -e
+            cd ${{ secrets.PROJECT_PATH }}/wireguard
+            rm -rf wg0.conf
+            echo "${{ secrets.WG0_CONF }}" > wg0.conf
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
         with:
@@ -85,7 +100,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
-            cd /home/ubuntu/telegram_bots/bednorz
+            set -e
+            cd ${{ secrets.PROJECT_PATH }}
             sudo docker compose down
             sudo docker compose up -d
             sudo docker image prune -a -f
