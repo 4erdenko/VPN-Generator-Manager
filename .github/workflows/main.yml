@@ -54,6 +54,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Stop containers and clean directory
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            set -e
+            cd ${{ secrets.PROJECT_PATH }}
+            if [ -f docker-compose.yml ]; then
+              sudo docker compose down
+            fi
+            rm -rf *
       - name: Checkout repository
         uses: actions/checkout@v3
 
