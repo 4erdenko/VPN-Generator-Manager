@@ -38,6 +38,8 @@ jobs:
           BOT_API: ${{ secrets.BOT_API_TEST }}
           CHAT_ID: 200100001
         run: |
+          echo "BOT_API=${BOT_API}" >> .env
+          echo "CHAT_ID=${CHAT_ID}" >> .env
           docker compose up -d
           sleep 20
       - name: Verify Docker Images
