@@ -2,8 +2,7 @@
 
 ![Python](https://img.shields.io/badge/python-v3.9-blue)
 ![Docker](https://img.shields.io/badge/docker-latest-blue)
-[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2F4erdenko%2FMischievousBednorz%2Fbadge&style=flat)](https://actions-badge.atrox.dev/4erdenko/MischievousBednorz/goto)
-
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2F4erdenko%2FVPN-Generator-Manager%2Fbadge&style=flat)](https://actions-badge.atrox.dev/4erdenko/VPN-Generator-Manager/goto)  
 This is a Telegram bot for managing VPN servers that you've received from the free VPN distribution service in Russia [VPNgen](https://vpngen.org/ru/#generator). If you're a VPN server manager (brigadier) from VPNgen, you can use this bot to manage your server users directly from Telegram.
 
 The bot runs inside a Docker container, and it can be automatically deployed using a GitHub Actions CI/CD pipeline.
