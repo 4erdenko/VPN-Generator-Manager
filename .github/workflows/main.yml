@@ -34,8 +34,11 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build and run Docker container
+        env:
+          BOT_API: ${{ secrets.BOT_API_TEST }}
+          CHAT_ID: 200100001
         run: |
-          docker compose up -d --build --env-file <(echo "BOT_API=${BOT_API_TEST}"; echo "CHAT_ID='${CHAT_ID}'")
+          docker compose up -d
           sleep 20
       - name: Verify Docker Images
         run: docker images
