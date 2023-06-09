@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Ждем 30 секунд перед запуском бота
+# Wait for wireless network to come up
 sleep 15
 
-# Запуск вашего бота
+# Run the bot
 python3 main.py

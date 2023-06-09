@@ -64,7 +64,19 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           source: "."
           target: "/home/ubuntu/telegram_bots/bednorz"
-
+      - name: Create .env file and fill it with Github secrets
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            cd /home/ubuntu/telegram_bots/bednorz
+            rm -rf .env
+            echo BOT_API=${{ secrets.BOT_API }} >> .env
+            echo CHAT_ID=${{ secrets.CHAT_ID }} >> .env
+            echo START_MSG=${{ secrets.START_MSG }} >> .env
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
         with:
@@ -76,4 +88,4 @@ jobs:
             cd /home/ubuntu/telegram_bots/bednorz
             sudo docker compose down
             sudo docker compose up -d
-            sudo docker image prune -f
+            sudo docker image prune -a -f

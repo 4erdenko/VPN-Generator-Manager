@@ -1,5 +1,6 @@
+import functools
+import logging
 import os
-from datetime import datetime
 
 import aiogram
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -7,91 +8,176 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode
-from pytz import timezone
 
 from api.vpn_generator import (delete_user, get_user, get_user_id_by_name,
-                               make_config, shorten_name)
-from config import BOT_API, CHAT_ID
+                               make_config)
+from config import BOT_API, CHAT_ID, START_MSG
 from telegram.keyboards import main_keyboard
+from telegram.users_handler import User
 
 bot = aiogram.Bot(token=BOT_API, parse_mode=ParseMode.HTML)
 dp = aiogram.Dispatcher(bot, storage=MemoryStorage())
 
+logger = logging.getLogger(__name__)
+
+
+def restricted(func):
+    """
+    Decorator to restrict the execution of a command only to
+     a user with a certain ID.
+
+    Args:
+        func (function): The function to be decorated.
+
+    Returns:
+        function: The decorated function.
+    """
+
+    @functools.wraps(func)
+    async def wrapped(message: aiogram.types.Message, *args, **kwargs):
+        if message.from_user.id != CHAT_ID:
+            return
+        return await func(message, *args, **kwargs)
+
+    return wrapped
+
 
 class DeleteUserState(StatesGroup):
+    """
+    A state group for tracking the process of a user deletion.
+    """
+
     waiting_for_user_id = State()
 
 
 @dp.message_handler(commands=['start'])
+@restricted
 async def start(message: aiogram.types.Message):
-    if message.from_user.id != CHAT_ID:
-        return
-    await message.answer(
-        'Hello, Mischievous Bednorz!', reply_markup=main_keyboard
-    )
+    """
+    The handler for the 'start' command. Sends a greeting message to the user.
+
+    Args:
+        message (aiogram.types.Message): The message from the user.
+    """
+    await message.answer(START_MSG, reply_markup=main_keyboard)
+    logger.info(f'User {message.from_user.id} started bot')
 
 
 @dp.message_handler(Text(equals='🔐 Make config'))
+@restricted
 async def get_config(message: aiogram.types.Message):
+    """
+    The handler for the 'Make config' command. Sends a
+    configuration file to the user.
+
+    Args:
+        message (aiogram.types.Message): The message from the user.
+    """
     filename = make_config()
     with open(filename, 'rb') as file:
         await message.answer_document(file, caption=filename)
     os.remove(filename)
+    logger.info(f'User {message.from_user.id} get config {filename}')
 
 
 @dp.message_handler(Text(equals='📝 Get users'))
+@restricted
 async def get_users(message: aiogram.types.Message):
-    try:
-        user_list = get_user()
-    except Exception as e:
-        await message.answer(text=f'Error while getting users: {e}')
-        return
-    result = []
-    for user in user_list:
-        last_visit = user.get('LastVisitHour')
-        if last_visit is not None:
-            last_visit = datetime.strptime(last_visit, '%Y-%m-%dT%H:%M:%S.%fZ')
-            last_visit = last_visit.replace(tzinfo=timezone('UTC'))
-            last_visit = last_visit.astimezone(timezone('Europe/Moscow'))
-            last_visit = last_visit.strftime('%Y-%m-%d %H:%M:%S')
-        else:
-            last_visit = ''
-        month_gb_quota = user.get('MonthlyQuotaRemainingGB')
-        problems = user.get('Problems')
-        status = user.get('Status')
-        user_name = shorten_name(user.get('UserName'))
-        status_icon = '🟩' if status == 'green' else '🟥'
-        problems_string = f'⛔: {problems} ' if problems else ''
-        time_string = (f'<b>Last enter:</b> <code>{last_visit}</code>' if
-                       last_visit else '<b>Last enter:</b>')
+    """
+    The handler for the 'Get users' command. Sends a list of users to the user.
 
-        result_message = (
-            f'{status_icon} :<strong>{user_name}</strong> '
-            f'{problems_string}'
-            f'🔃: <code>{month_gb_quota} GB</code>\n'
-            f'{time_string}\n'
-            f'--------------------------------------------------------\n'
+    Args:
+        message (aiogram.types.Message): The message from the user.
+    """
+    wait_message = await message.answer('Getting users...')
+    try:
+        user_data = get_user()
+    except Exception as e:
+        await message.answer(text=f'Error while getting users:\n{e}')
+        logger.error(f'Error while getting users:{e}')
+        return
+
+    users = [User(data) for data in user_data]
+    result = [user.format_message() for user in users]
+
+    total_users = len(users)
+    active_users = len([user for user in users if user.is_active])
+    deactive_users = len(
+        [user for user in users if not user.is_active and user.has_visited]
+    )
+    not_entered_users = len(
+        [user for user in users if not user.is_active and not user.has_visited]
+    )
+    low_gb_quota_names = [user.name for user in users if user.has_low_quota]
+
+    if low_gb_quota_names:
+        summary_message = (
+            f'\n'
+            f'Total users: {total_users}\n'
+            f'Active:{active_users}\n'
+            f'Deactive: {deactive_users}\n'
+            f'Not entered: {not_entered_users}\n'
+            f'Low quota:'
+            f'<code>\n{", ".join(low_gb_quota_names)}\n</code>'
+        )
+    else:
+        summary_message = (
+            f'\n'
+            f'Total users: {total_users}\n'
+            f'Active:{active_users}\n'
+            f'Deactive: {deactive_users}\n'
+            f'Not entered: {not_entered_users}\n'
         )
 
-        result.append(result_message)
-    await message.answer(text=''.join(result))
+    result.append(summary_message)
+
+    await bot.edit_message_text(
+        message_id=wait_message.message_id,
+        chat_id=wait_message.chat.id,
+        text=''.join(result)
+    )
+    logger.info(f'User {message.from_user.id} get users')
 
 
 @dp.message_handler(Text(equals='❌ Delete user'))
+@restricted
 async def start_delete_user(message: aiogram.types.Message):
+    """
+    The handler for the 'Delete user' command. It asks the user to
+    enter a user ID for deletion.
+
+    Args:
+        message (aiogram.types.Message): The message from the user.
+    """
     try:
         await message.answer('Enter user ID')
         await DeleteUserState.waiting_for_user_id.set()
+        logger.info(f'User {message.from_user.id} start delete user')
     except Exception as e:
-        await message.answer(f'Error: while deleting user: {e}')
+        await message.answer(f'Error: while start deleting user: {e}')
+        logger.error(f'Error: while deleting user: {e}')
 
 
 @dp.message_handler(state=DeleteUserState.waiting_for_user_id)
+@restricted
 async def delete_user_id(message: aiogram.types.Message, state: FSMContext):
+    """
+    The handler for the deletion of a user ID. It receives the ID from
+    the user, attempts to delete the user
+    with this ID and sends a result message to the user.
+
+    Args:
+        message (aiogram.types.Message): The message from the user.
+        state (FSMContext): The finite state machine context to
+        manage the states of the conversation.
+    """
     user_id = get_user_id_by_name(message.text)
     if user_id and delete_user(user_id):
         await message.answer('User deleted')
+        logger.info(f'User {message.from_user.id} deleted user {user_id}')
     else:
         await message.answer('User not found')
+        logger.info(f'User {message.from_user.id} not found user {user_id}')
     await state.reset_state(with_data=True)
     await state.finish()
+    logger.info(f'User {message.from_user.id} finish delete user')

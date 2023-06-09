@@ -3,7 +3,7 @@ version: '3.8'
 services:
   wireguard:
     image: linuxserver/wireguard
-    container_name: bednorz
+    container_name: wireguard
     restart: unless-stopped
     volumes:
       - './wireguard:/config'
