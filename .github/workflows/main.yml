@@ -34,11 +34,8 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build and run Docker container
-        env:
-          BOT_API: ${{ secrets.BOT_API_TEST }}
-          CHAT_ID: '123456789'
         run: |
-          docker compose up -d
+            docker compose up -d --build --env-file <(echo "BOT_API=${BOT_API_TEST}"; echo "CHAT_ID='${CHAT_ID}'")
           sleep 20
       - name: Verify Docker Images
         run: docker images
@@ -69,6 +66,7 @@ jobs:
             cd ${{ secrets.PROJECT_PATH }}
             if [ -f docker-compose.yml ]; then
               sudo docker compose down
+              sudo docker image prune -a -f
             fi
             rm -rf *
       - name: Checkout repository
@@ -120,5 +118,5 @@ jobs:
           script: |
             set -e
             cd ${{ secrets.PROJECT_PATH }}
-            sudo docker compose up -d
+            sudo docker compose up -d --build
             sudo docker image prune -a -f
