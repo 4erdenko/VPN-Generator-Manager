@@ -2,6 +2,7 @@ import logging
 import sys
 
 from aiogram import executor
+
 # Imports the dispatcher from bot.py.
 from telegram.bot import dp
 
