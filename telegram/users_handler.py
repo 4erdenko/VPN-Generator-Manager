@@ -1,8 +1,7 @@
 from datetime import datetime
 
-from pytz import timezone
-
 from api.vpn_generator import shorten_name
+from pytz import timezone
 
 
 def convert_date(date_str):
@@ -46,8 +45,11 @@ class User:
         self.data = data
         self.name = shorten_name(self.data.get('UserName'))
         self.status = self.data.get('Status')
-        self.last_visit = convert_date(self.data.get('LastVisitHour')) \
-            if self.data.get('LastVisitHour') else None
+        self.last_visit = (
+            convert_date(self.data.get('LastVisitHour'))
+            if self.data.get('LastVisitHour')
+            else None
+        )
         self.quota = self.data.get('MonthlyQuotaRemainingGB')
         self.problems = self.data.get('Problems')
 
@@ -91,8 +93,11 @@ class User:
         """
         status_icon = '🟩' if self.is_active else '🟥'
         problems_string = f'⛔: {self.problems} ' if self.problems else ''
-        time_string = (f'<b>Last enter:</b> <code>{self.last_visit}</code>'
-                       if self.last_visit else '<b>Last enter:</b>')
+        time_string = (
+            f'<b>Last enter:</b> <code>{self.last_visit}</code>'
+            if self.last_visit
+            else '<b>Last enter:</b>'
+        )
         return (
             f'{status_icon} :<strong>{self.name}</strong> '
             f'{problems_string}'

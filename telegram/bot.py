@@ -8,9 +8,8 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode
-
-from api.vpn_generator import (delete_user, get_user, get_user_id_by_name,
-                               make_config)
+from api.vpn_generator import (delete_user, get_stats, get_user,
+                               get_user_id_by_name, make_config)
 from config import BOT_API, CHAT_ID, START_MSG
 from telegram.keyboards import main_keyboard
 from telegram.users_handler import User
@@ -99,9 +98,6 @@ async def get_users(message: aiogram.types.Message):
 
     users = [User(data) for data in user_data]
     result = [user.format_message() for user in users]
-
-    total_users = len(users)
-    active_users = len([user for user in users if user.is_active])
     deactive_users = len(
         [user for user in users if not user.is_active and user.has_visited]
     )
@@ -109,32 +105,27 @@ async def get_users(message: aiogram.types.Message):
         [user for user in users if not user.is_active and not user.has_visited]
     )
     low_gb_quota_names = [user.name for user in users if user.has_low_quota]
+    active_users, total_users, total_gb_quota = get_stats()
 
-    if low_gb_quota_names:
-        summary_message = (
-            f'\n'
-            f'Total users: {total_users}\n'
-            f'Active:{active_users}\n'
-            f'Deactive: {deactive_users}\n'
-            f'Not entered: {not_entered_users}\n'
-            f'Low quota:'
-            f'<code>\n{", ".join(low_gb_quota_names)}\n</code>'
-        )
-    else:
-        summary_message = (
-            f'\n'
-            f'Total users: {total_users}\n'
-            f'Active:{active_users}\n'
-            f'Deactive: {deactive_users}\n'
-            f'Not entered: {not_entered_users}\n'
-        )
+    low_quota_info = (
+        f'<b>Low quota:</b> {" | ".join(low_gb_quota_names)}'
+        if low_gb_quota_names
+        else ''
+    )
+    summary_message = (
+        f'<b>Total users:</b> {total_users}\n'
+        f'<b>Active:</b> {active_users} | <b>Deactive:</b> {deactive_users} | '
+        f'<b>Not entered:</b> {not_entered_users}\n'
+        f'<b>Total quota:</b> {total_gb_quota}\n'
+        f'{low_quota_info}'
+    )
 
     result.append(summary_message)
 
     await bot.edit_message_text(
         message_id=wait_message.message_id,
         chat_id=wait_message.chat.id,
-        text=''.join(result)
+        text=''.join(result),
     )
     logger.info(f'User {message.from_user.id} get users')
 

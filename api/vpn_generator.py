@@ -191,3 +191,32 @@ def get_user_id_by_name(user_name):
         return f'Error while trying to get user id by name: {error}'
     logger.info('User id successfully got')
     return None
+
+
+def get_stats():
+    """
+    This function retrieves the stats of the VPN server.
+    :return: The stats if successful. Otherwise,
+        it returns the error message.
+    """
+    bearer_token = get_token()
+    try:
+        headers = {
+            'Accept': 'application/json, text/plain, */*',
+            'Authorization': f'Bearer {bearer_token}',
+        }
+        response = httpx.get(
+            'https://vpn.works/users/stats',
+            headers=headers,
+        )
+        acitve_users_all = response.json().get('ActiveUsers')
+        active_users = acitve_users_all[-1]['Value']
+        total_users_all = response.json().get('TotalUsers')
+        total_users = total_users_all[-1]['Value']
+        total_traffic_all = response.json().get('TotalTrafficGB')
+        total_traffic = total_traffic_all[-1]['Value']
+        logger.info('Stats successfully got')
+        return active_users, total_users, total_traffic
+    except Exception as error:
+        logger.error(f'Error while trying to get stats: {error}')
+        return f'Error while trying to get stats: {error}'
