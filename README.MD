@@ -63,18 +63,12 @@ If you want to run the bot on your local machine, follow these steps:
 
 To run the bot inside a Docker container, make sure Docker is installed and running on your machine:
 
-1. Build the Docker image:
+1. Copy project folder and create .env file inside.
 
+3. Run the Docker containers:
+    (inside project folder)
     ```bash
-    docker build -t vpnbot .
-    ```
-
-2. Create a `.env` file as described above.
-
-3. Run the Docker container:
-
-    ```bash
-    docker run --env-file .env -v $(pwd)/wireguard:/app/wireguard vpnbot
+    docker compuse up -d
     ```
 
 Here, we are mounting the `wireguard` directory from your local machine into the Docker container, so that the bot can access the `wg0.conf` file.
