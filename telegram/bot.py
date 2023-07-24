@@ -12,13 +12,14 @@ from aiogram.types import ParseMode
 from config import BOT_API, CHAT_ID, START_MSG
 from telegram.keyboards import main_keyboard
 from telegram.users_handler import User
-from vpnworks.vpn_generator import (delete_user, get_stats, get_user,
-                                    get_user_id_by_name, make_config)
+from vpnworks.api import VpnWorksApi
 
 bot = aiogram.Bot(token=BOT_API, parse_mode=ParseMode.HTML)
 dp = aiogram.Dispatcher(bot, storage=MemoryStorage())
 
 logger = logging.getLogger(__name__)
+
+client = VpnWorksApi()
 
 
 def restricted(func):
@@ -73,9 +74,19 @@ async def get_config(message: aiogram.types.Message):
     Args:
         message (aiogram.types.Message): The message from the user.
     """
-    filename = make_config()
+    filename, username = await client.create_conf_file()
+    users_dict = await client.get_users_dict()
+    print(users_dict)
+    person_name = users_dict.get(f'{username}').get('PersonName')
+    person_desc = users_dict.get(f'{username}').get('PersonDesc')
+    person_link = users_dict.get(f'{username}').get('PersonDescLink')
+    caption_message = (
+        f'<code>{username}</code>'
+        f'\n\n<a href="{person_link}">{person_name}</a>'
+        f'\n {person_desc}'
+    )
     with open(filename, 'rb') as file:
-        await message.answer_document(file, caption=filename)
+        await message.answer_document(file, caption=caption_message)
     os.remove(filename)
     logger.info(f'User {message.from_user.id} get config {filename}')
 
@@ -90,12 +101,7 @@ async def get_users(message: aiogram.types.Message):
         message (aiogram.types.Message): The message from the user.
     """
     wait_message = await message.answer('Getting users...')
-    try:
-        user_data = get_user()
-    except Exception as e:
-        await message.answer(text=f'Error while getting users:\n{e}')
-        logger.error(f'Error while getting users:{e}')
-        return
+    user_data = await client.get_users()
 
     users = [User(data) for data in user_data]
     result = [user.format_message() for user in users]
@@ -106,7 +112,10 @@ async def get_users(message: aiogram.types.Message):
         [user for user in users if not user.is_active and not user.has_visited]
     )
     low_gb_quota_names = [user.name for user in users if user.has_low_quota]
-    active_users, total_users, total_gb_quota = get_stats()
+    stats = await client.get_users_stats()
+    active_users = stats.get('ActiveUsers').pop().get('Value')
+    total_users = stats.get('TotalUsers').pop().get('Value')
+    total_gb_quota = stats.get('TotalTrafficGB').pop().get('Value')
 
     low_quota_info = (
         f'<b>Low quota:</b> {" | ".join(low_gb_quota_names)}'
@@ -163,8 +172,8 @@ async def delete_user_id(message: aiogram.types.Message, state: FSMContext):
         state (FSMContext): The finite state machine context to
         manage the states of the conversation.
     """
-    user_id = get_user_id_by_name(message.text)
-    if user_id and delete_user(user_id):
+    user_id = await client.get_user_id(message.text)
+    if user_id and await client.delete_user(user_id) is not None:
         await message.answer('User deleted')
         logger.info(f'User {message.from_user.id} deleted user {user_id}')
     else:

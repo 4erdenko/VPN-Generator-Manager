@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from vpnworks.vpn_generator import shorten_name
 from pytz import timezone
 
 
@@ -43,7 +42,7 @@ class User:
             data (dict): Dictionary of user data.
         """
         self.data = data
-        self.name = shorten_name(self.data.get('UserName'))
+        self.name = self.data.get('UserName')
         self.status = self.data.get('Status')
         self.last_visit = (
             convert_date(self.data.get('LastVisitHour'))
@@ -99,7 +98,7 @@ class User:
             else '<b>Last enter:</b>'
         )
         return (
-            f'{status_icon} :<strong>{self.name}</strong> '
+            f'{status_icon} :<code>{self.name}</code> '
             f'{problems_string}'
             f'🔃: <code>{self.quota} GB</code>\n'
             f'{time_string}\n'
