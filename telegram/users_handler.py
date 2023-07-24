@@ -1,8 +1,7 @@
 from datetime import datetime
 
+from vpnworks.vpn_generator import shorten_name
 from pytz import timezone
-
-from api.vpn_generator import shorten_name
 
 
 def convert_date(date_str):
