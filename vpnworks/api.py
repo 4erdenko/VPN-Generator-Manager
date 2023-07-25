@@ -1,5 +1,3 @@
-import asyncio
-
 import aiofiles
 import httpx
 from tenacity import retry, stop_after_attempt
