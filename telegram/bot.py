@@ -76,17 +76,19 @@ async def get_config(message: aiogram.types.Message):
     """
     filename, username = await client.create_conf_file()
     users_dict = await client.get_users_dict()
-    print(users_dict)
     person_name = users_dict.get(f'{username}').get('PersonName')
     person_desc = users_dict.get(f'{username}').get('PersonDesc')
     person_link = users_dict.get(f'{username}').get('PersonDescLink')
     caption_message = (
         f'<code>{username}</code>'
         f'\n\n<a href="{person_link}">{person_name}</a>'
-        f'\n {person_desc}'
+        f'\n{person_desc}'
     )
-    with open(filename, 'rb') as file:
-        await message.answer_document(file, caption=caption_message)
+    try:
+        with open(filename, 'rb') as file:
+            await message.answer_document(file, caption=caption_message)
+    except Exception as error:
+        return await message.answer(str(error))
     os.remove(filename)
     logger.info(f'User {message.from_user.id} get config {filename}')
 
