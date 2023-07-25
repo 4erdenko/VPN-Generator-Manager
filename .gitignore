@@ -242,3 +242,4 @@ output
 coredns
 templates
 *.conf
+wireguard/
