@@ -1,3 +1,5 @@
+import asyncio
+
 import aiofiles
 import httpx
 from tenacity import retry, stop_after_attempt
@@ -48,6 +50,8 @@ class VpnWorksApi:
                     req_type=req_type,
                     headers=headers,
                 )
+            if req_type == 'delete':
+                return resp
             resp.raise_for_status()
             return resp
 
@@ -60,19 +64,20 @@ class VpnWorksApi:
         return response.json()
 
     async def delete_user(self, UserID):
-        return await self._make_request(
+        response =  await self._make_request(
             f'user/{str(UserID)}',
             req_type='delete',
         )
+        return response.status_code
 
-    async def _get_conf_file(self):
+    async def get_conf_file(self):
         response = await self._make_request(
             endpoint='user', headers=self.config_headers, req_type='post'
         )
         return response.json()
 
     async def create_conf_file(self):
-        data = await self._get_conf_file()
+        data = await self.get_conf_file()
         wireguard_config = data.get('WireguardConfig')
         filename = wireguard_config.get('FileName')
         file_content = wireguard_config.get('FileContent')
@@ -93,3 +98,11 @@ class VpnWorksApi:
     async def get_user_id(self, name):
         users_dict = await self.get_users_dict()
         return users_dict.get(str(name), {}).get('UserID')
+
+
+# async def main():
+#     c = VpnWorksApi()
+#     b = await c.get_users_dict()
+#     print(b)
+#
+# asyncio.run(main())
