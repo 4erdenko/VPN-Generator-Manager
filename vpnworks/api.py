@@ -102,7 +102,9 @@ class VpnWorksApi:
 
 # async def main():
 #     c = VpnWorksApi()
-#     b = await c.get_users_dict()
-#     print(b)
+#     # b = await c.get_users_dict()
+#     # print(b)
+#     d = await c.delete_user('123')
+#     print(d)
 #
 # asyncio.run(main())
