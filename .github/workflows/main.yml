@@ -73,7 +73,7 @@ jobs:
           script: |
             cd ${{ secrets.PROJECT_PATH }}
             sudo docker compose down
-            sudo docker image prune -a -f
+            sudo docker image prune -f
 
       - name: Checkout repository
         uses: actions/checkout@v3
