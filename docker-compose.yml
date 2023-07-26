@@ -24,12 +24,35 @@ services:
   telegram_bot:
     build:
       context: .
-    container_name: TG_BOT
+    container_name: bednorz_bot
     restart: unless-stopped
     network_mode: service:wireguard
     depends_on:
       - wireguard
 
-networks:
-  backbone:
-    driver: bridge
+#  db:
+#    image: postgres
+#    restart: always
+#    environment:
+#      POSTGRES_USER: your_user
+#      POSTGRES_PASSWORD: your_password
+#      POSTGRES_DB: your_database
+#    volumes:
+#      - ./data/db:/var/lib/postgresql/data
+#    networks:
+#      - backbone
+#
+#  fastapi:
+#    build: ./fastapi_app
+##    volumes:
+##      - ../:/app
+#    ports:
+#      - "8000:8000"
+##    depends_on:
+##      - db
+##    networks:
+##      - backbone
+#
+#networks:
+#  backbone:
+#    driver: bridge

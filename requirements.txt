@@ -5,3 +5,4 @@ aiofiles~=23.1.0
 tenacity~=8.2.2
 httpx~=0.24.1
 fastapi~=0.100.0
+psycopg2~=2.9.6

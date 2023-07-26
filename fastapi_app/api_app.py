@@ -1,7 +1,21 @@
+import json
+import os
 from typing import Optional
-from fastapi import FastAPI, BackgroundTasks, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, BackgroundTasks, HTTPException, Request
+from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
+
+from database.database import SessionLocal
+from database.models import Log
 from vpnworks.api import VpnWorksApi
+from sqlalchemy.orm import Session
+from fastapi import Depends
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 app = FastAPI()
 api = VpnWorksApi()
@@ -15,20 +29,61 @@ def user_not_found():
     raise HTTPException(status_code=404, detail='User not found')
 
 
+@app.middleware("http")
+async def log_request(request: Request, call_next):
+    response = await call_next(request)
+
+    db = SessionLocal()
+
+    response_info = {"media_type": response.headers.get('content-type')}
+
+    if isinstance(response, StreamingResponse):
+        response_info["response_type"] = "streaming"
+    elif isinstance(response, FileResponse):
+        response_info["response_type"] = "file"
+        response_info["filename"] = response.filename
+    elif isinstance(response, JSONResponse):
+        response_info["response_type"] = "json"
+        response_info["content"] = response.content.decode("utf-8")
+    else:
+        response_info["response_type"] = "regular"
+        response_info["content"] = response.body.decode("utf-8")
+
+    log = Log(
+        request_path=request.url.path,
+        request_method=request.method,
+        request_args=dict(request.query_params),
+        response_status=response.status_code,
+        response_body=response_info,
+    )
+    db.add(log)
+    db.commit()
+    db.close()
+
+    return response
+
+
+
+
+
+
+
 @app.get('/token', description="Retrieve the API token")
 async def get_token():
     token = await api.token
-    return {'Bearer token': token}
+    return JSONResponse({'Bearer token': token})
 
 
 @app.get('/users', description="Retrieve a list of all users")
 async def get_users():
-    return await api.get_users()
+    users = await api.get_users()
+    return JSONResponse(users)
 
 
 @app.get('/user/id/{id}', description="Retrieve a user by their ID")
 async def get_user_by_id(id: int):
-    users = await get_users()
+    response = await get_users()
+    users = json.loads(response.body)
     try:
         return users[id]
     except IndexError:
