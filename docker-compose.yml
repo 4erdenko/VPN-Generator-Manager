@@ -43,7 +43,7 @@ services:
 #      - backbone
 #
  fastapi:
-    build: ./fastapi_app
+    build: ./vpnworks
     ports:
       - "8000:8000"
     command: ["uvicorn", "fastapi_app:app", "--host", "0.0.0.0", "--port", "8000"]
