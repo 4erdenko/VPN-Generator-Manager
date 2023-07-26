@@ -5,7 +5,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from vpnworks.database import models
+from ..database import models
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
