@@ -1,14 +1,12 @@
 import json
 import os
-from typing import Optional
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Request
-from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 
 from database.database import SessionLocal
+from api import VpnWorksApi
 from database.models import Log
-from vpnworks.api import VpnWorksApi
-from sqlalchemy.orm import Session
-from fastapi import Depends
+
 
 def get_db():
     db = SessionLocal()

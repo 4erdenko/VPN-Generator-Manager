@@ -1,9 +1,8 @@
-aiogram==2.25.1
-pytz==2023.3
 python-dotenv==1.0.0
 aiofiles~=23.1.0
 tenacity~=8.2.2
 httpx~=0.24.1
-
+fastapi~=0.100.0
+psycopg2~=2.9.6
 SQLAlchemy~=2.0.19
 alembic~=1.11.1

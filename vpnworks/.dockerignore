@@ -1,0 +1,5 @@
+/output
+/venv
+.gitignore
+telegram/
+wireguard/
