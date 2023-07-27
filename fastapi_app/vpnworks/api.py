@@ -1,5 +1,3 @@
-import asyncio
-
 import aiofiles
 import httpx
 from tenacity import retry, stop_after_attempt
@@ -64,7 +62,7 @@ class VpnWorksApi:
         return response.json()
 
     async def delete_user(self, UserID):
-        response =  await self._make_request(
+        response = await self._make_request(
             f'user/{str(UserID)}',
             req_type='delete',
         )
@@ -98,7 +96,6 @@ class VpnWorksApi:
     async def get_user_id(self, name):
         users_dict = await self.get_users_dict()
         return users_dict.get(str(name), {}).get('UserID')
-
 
 # async def main():
 #     c = VpnWorksApi()

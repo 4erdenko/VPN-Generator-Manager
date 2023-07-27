@@ -3,7 +3,9 @@
 ![Python](https://img.shields.io/badge/python-v3.9-blue)
 ![Docker](https://img.shields.io/badge/docker-latest-blue)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2F4erdenko%2FVPN-Generator-Manager%2Fbadge&style=flat)](https://actions-badge.atrox.dev/4erdenko/VPN-Generator-Manager/goto)  
-This is a Telegram bot for managing VPN servers that you've received from the free VPN distribution service in Russia [VPNgen](https://vpngen.org/ru/#generator). If you're a VPN server manager (brigadier) from VPNgen, you can use this bot to manage your server users directly from Telegram.
+This is a Telegram bot for managing VPN servers that you've received from the free VPN distribution service in
+Russia [VPNgen](https://vpngen.org/ru/#generator). If you're a VPN server manager (brigadier) from VPNgen, you can use
+this bot to manage your server users directly from Telegram.
 
 The bot runs inside a Docker container, and it can be automatically deployed using a GitHub Actions CI/CD pipeline.
 
@@ -66,16 +68,18 @@ To run the bot inside a Docker container, make sure Docker is installed and runn
 1. Copy project folder and create .env file inside.
 
 3. Run the Docker containers:
-    (inside project folder)
+   (inside project folder)
     ```bash
     docker compuse up -d
     ```
 
-Here, we are mounting the `wireguard` directory from your local machine into the Docker container, so that the bot can access the `wg0.conf` file.
+Here, we are mounting the `wireguard` directory from your local machine into the Docker container, so that the bot can
+access the `wg0.conf` file.
 
 ## Automatic Deployment with GitHub Actions
 
-You can also set up automatic deployment of your bot using the provided GitHub Actions CI/CD pipeline. You will need to add the following secrets to your GitHub repository:
+You can also set up automatic deployment of your bot using the provided GitHub Actions CI/CD pipeline. You will need to
+add the following secrets to your GitHub repository:
 
 - `HOST`: The IP address or hostname of your server.
 - `USER`: The username to use for SSH.
@@ -88,7 +92,8 @@ You can also set up automatic deployment of your bot using the provided GitHub A
 - `START_MSG`: The start message for your bot.
 - `WG0_CONF`: The content of your `wg0.conf` file.
 
-Once these secrets are set up, the bot will automatically be deployed to your server whenever you push to the `master` branch.
+Once these secrets are set up, the bot will automatically be deployed to your server whenever you push to the `master`
+branch.
 
 ## Contribution
 

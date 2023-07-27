@@ -1,11 +1,12 @@
 import json
 import os
+
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 
-from database.database import SessionLocal
-from api import VpnWorksApi
-from database.models import Log
+from db.database import SessionLocal
+from db.models import Log
+from vpnworks.api import VpnWorksApi
 
 
 def get_db():
@@ -14,6 +15,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
 
 app = FastAPI()
 api = VpnWorksApi()
@@ -61,11 +63,6 @@ async def log_request(request: Request, call_next):
     return response
 
 
-
-
-
-
-
 @app.get('/token', description="Retrieve the API token")
 async def get_token():
     token = await api.token
@@ -106,7 +103,7 @@ async def delete_user(user_id: str):
 
 
 @app.get('/user/{name}/stats',
-description='Get personal stats for user via username')
+         description='Get personal stats for user via username')
 async def get_personal_stats(name: str):
     users = await api.get_users_dict()
     user = users.get(str(name))
@@ -128,7 +125,7 @@ async def get_personal_stats(name: str):
 
 
 @app.get('/config',
-description='Create and download user conf file')
+         description='Create and download user conf file')
 async def get_config_file(background_tasks: BackgroundTasks):
     filename, _ = await api.create_conf_file()
     background_tasks.add_task(remove_file, filename)

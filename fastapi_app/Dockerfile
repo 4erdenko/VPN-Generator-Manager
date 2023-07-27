@@ -2,7 +2,7 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:latest
 
 # Установка рабочего каталога в контейнере
-WORKDIR /vpnworks
+WORKDIR /fastapi_app
 
 # Установка пути PYTHONPATH
 ENV PYTHONPATH=/vpnworks:$PYTHONPATH
@@ -14,4 +14,4 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Копирование исходного кода в контейнер
-COPY . /vpnworks
+COPY /fastapi_app .
