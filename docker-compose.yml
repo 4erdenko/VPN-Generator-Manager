@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   #  wireguard:
@@ -30,27 +30,18 @@ services:
   #    depends_on:
   #      - wireguard
 
-  #  db:
-  #    image: postgres
-  #    restart: always
+
+
+  #  fastapi:
+  #    build: fastapi_app
+  #    ports:
+  #      - "8000:8000"
+  #    command: [ "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000" ]
+  #    depends_on:
+  #      - db
   #    environment:
-  #      POSTGRES_USER: your_user
-  #      POSTGRES_PASSWORD: your_password
-  #      POSTGRES_DB: your_database
-  #    volumes:
-  #      - ./data/db:/var/lib/postgresql/data
-  #    networks:
-  #      - backbone
-  #
-  fastapi:
-    build: fastapi_app
-    ports:
-      - "8000:8000"
-    command: [ "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000" ]
-    depends_on:
-      - db
-    environment:
-      - DATABASE_URL=postgresql://username:password@db:5432/database
+  #      - DATABASE_URL=postgresql://username:password@db:5432/database
+
   db:
     image: postgres:13
     ports:

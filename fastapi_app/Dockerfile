@@ -14,4 +14,4 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Копирование исходного кода в контейнер
-COPY /fastapi_app .
+COPY . .

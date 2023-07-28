@@ -1,13 +1,13 @@
 import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, JSON
+from sqlalchemy import JSON, Column, DateTime, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
 
 class Log(Base):
-    __tablename__ = "logs"
+    __tablename__ = 'logs'
 
     id = Column(Integer, primary_key=True, index=True)
     request_date = Column(DateTime, default=datetime.datetime.utcnow)
