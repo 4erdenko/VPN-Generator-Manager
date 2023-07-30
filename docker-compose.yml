@@ -1,52 +1,56 @@
 version: '3.9'
 
 services:
-  #  wireguard:
-  #    image: linuxserver/wireguard
-  #    container_name: wireguard
-  #    restart: unless-stopped
-  #    volumes:
-  #      - './wireguard:/config'
-  #      - '/lib/modules:/lib/modules:ro'
-  #    environment:
-  #      - PUID=1000
-  #      - PGID=1000
-  #    cap_add:
-  #      - NET_ADMIN
-  #      - SYS_MODULE
-  #    privileged: true
-  #    sysctls:
-  #      - net.ipv4.conf.all.src_valid_mark=1
-  #      - net.ipv6.conf.all.disable_ipv6=0
-  #    networks:
-  #      - backbone
-  #
-  #  telegram_bot:
-  #    build:
-  #      context: .
-  #    container_name: bednorz_bot
-  #    restart: unless-stopped
-  #    network_mode: service:wireguard
-  #    depends_on:
-  #      - wireguard
+    wireguard:
+      image: linuxserver/wireguard
+      container_name: wireguard
+      restart: unless-stopped
+      volumes:
+        - './wireguard:/config'
+        - '/lib/modules:/lib/modules:ro'
+      environment:
+        - PUID=1000
+        - PGID=1000
+      cap_add:
+        - NET_ADMIN
+        - SYS_MODULE
+      privileged: true
+      sysctls:
+        - net.ipv4.conf.all.src_valid_mark=1
+        - net.ipv6.conf.all.disable_ipv6=0
+      networks:
+        - backbone
+
+    telegram_bot:
+      build:
+        context: .
+      container_name: bednorz_bot
+      restart: unless-stopped
+      network_mode: service:wireguard
+      depends_on:
+        - wireguard
 
 
 
-  #  fastapi:
-  #    build: fastapi_app
-  #    ports:
-  #      - "8000:8000"
-  #    command: [ "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000" ]
-  #    depends_on:
-  #      - db
-  #    environment:
-  #      - DATABASE_URL=postgresql://username:password@db:5432/database
+    fastapi:
+      build: fastapi_app
+      ports:
+        - "8000:8000"
+      command: [ "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000" ]
+      network_mode: service:wireguard
+      restart: unless-stopped
+      depends_on:
+        - db
+      environment:
+        - DATABASE_URL=postgresql://username:password@db:5432/database
 
-  db:
-    image: postgres:13
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=username
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=database
+    db:
+      image: postgres:13
+      network_mode: service:wireguard
+      restart: unless-stopped
+      ports:
+        - "5432:5432"
+      environment:
+        - POSTGRES_USER=username
+        - POSTGRES_PASSWORD=password
+        - POSTGRES_DB=database

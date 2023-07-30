@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 SQLALCHEMY_DATABASE_URL = (
-    'postgresql://username:password@localhost:5432' '/database'
+    'postgresql://username:password@db:5432' '/database'
 )
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
