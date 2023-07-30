@@ -6,3 +6,6 @@ fastapi~=0.100.0
 psycopg2~=2.9.6
 SQLAlchemy~=2.0.19
 alembic~=1.11.1
+mypy~=1.4.1
+sqlalchemy-stubs~=0.4
+types-aiofiles~=23.1.0.5
