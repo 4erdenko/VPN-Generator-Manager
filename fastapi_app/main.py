@@ -3,13 +3,13 @@ import os
 from datetime import date, datetime
 from typing import Any, Dict, Generator, List, Optional, Union
 
+from db.database import SessionLocal
+from db.models import Log
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from db.database import SessionLocal
-from db.models import Log
 from vpnworks.api import VpnWorksApi
 
 
@@ -33,9 +33,10 @@ def user_not_found():
     raise HTTPException(status_code=404, detail='User not found')
 
 
-
 @app.middleware('http')
-async def log_request(request: Request, call_next) -> Union[StreamingResponse, FileResponse, JSONResponse]:
+async def log_request(
+    request: Request, call_next
+) -> Union[StreamingResponse, FileResponse, JSONResponse]:
     response = await call_next(request)
 
     db = SessionLocal()
@@ -90,7 +91,6 @@ async def get_user_by_id(id: int) -> Dict[str, Any]:
         user_not_found()  # Just call the function to raise the exception
 
 
-
 @app.get('/user/name/{name}', description='Retrieve a user by their name')
 async def get_user_by_name(name: str) -> Union[Dict[str, Any]]:
     users_dict = await api.get_users_dict()
@@ -108,8 +108,13 @@ async def delete_user(user_id: str) -> Union[int]:
     return result_code
 
 
-@app.get('/user/{name}/stats', description='Get personal stats for user via username')
-async def get_personal_stats(name: str) -> Union[Dict[str, Dict[str, Union[str, int, None]]]]:
+@app.get(
+    '/user/{name}/stats',
+    description='Get personal stats for user via username',
+)
+async def get_personal_stats(
+    name: str,
+) -> Union[Dict[str, Dict[str, Union[str, int, None]]]]:
     users = await api.get_users_dict()
     user = users.get(str(name))
     if user:
