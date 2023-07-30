@@ -1,7 +1,7 @@
 import json
 import os
 from datetime import date, datetime
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from db.database import SessionLocal
 from db.models import Log
@@ -137,16 +137,19 @@ async def get_config_file(background_tasks: BackgroundTasks):
     return FileResponse(filename, filename=filename)
 
 
+
+
+
 class LogOut(BaseModel):
     request_date: datetime
     request_path: str
     request_method: str
     request_args: dict
     response_status: int
-    response_body: dict
+    response_body: dict[Optional[str], Any]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 @app.get('/logs', response_model=List[LogOut])
