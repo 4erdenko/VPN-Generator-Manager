@@ -4,7 +4,7 @@ import sys
 from aiogram import executor
 
 # Imports the dispatcher from bot.py.
-from telegram.bot import dp
+from bot import dp
 
 if __name__ == '__main__':
     logging.basicConfig(

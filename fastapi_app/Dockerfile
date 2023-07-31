@@ -1,11 +1,12 @@
 # Установка базового образа
-FROM tiangolo/uvicorn-gunicorn-fastapi:latest
+FROM python:3.11
 
 # Установка рабочего каталога в контейнере
 WORKDIR /fastapi_app
 
 # Установка пути PYTHONPATH
-ENV PYTHONPATH=/vpnworks:$PYTHONPATH
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
 # Копирование зависимостей в контейнер
 COPY requirements.txt .

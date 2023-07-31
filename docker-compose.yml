@@ -22,9 +22,9 @@ services:
         - backbone
 
     telegram_bot:
-      build:
-        context: .
+      build: .
       container_name: bednorz_bot
+      command: ["python", "main.py"]
       restart: unless-stopped
       network_mode: service:wireguard
       depends_on:
@@ -34,19 +34,18 @@ services:
 
     fastapi:
       build: fastapi_app
+      command: bash -c "alembic revision --autogenerate -m 'Auto generated migration' && alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+      restart: unless-stopped
       ports:
         - "8000:8000"
-      command: [ "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000" ]
-      network_mode: service:wireguard
-      restart: unless-stopped
       depends_on:
         - db
       environment:
         - DATABASE_URL=postgresql://username:password@db:5432/database
 
+
     db:
       image: postgres:13
-      network_mode: service:wireguard
       restart: unless-stopped
       ports:
         - "5432:5432"
@@ -54,3 +53,7 @@ services:
         - POSTGRES_USER=username
         - POSTGRES_PASSWORD=password
         - POSTGRES_DB=database
+
+networks:
+  backbone:
+    driver: bridge

@@ -1,18 +1,19 @@
+# Set the base image
 FROM python:3.8-alpine
-# Set work directory
-WORKDIR ./
+
+# Set the working directory
+WORKDIR /.
+
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+# Copy the requirements.txt file to the working directory
 COPY ./requirements.txt .
-# Install dependencies
-RUN pip install --no-cache-dir -r ./requirements.txt
-# Copy project to workdir
-COPY . .
 
-# Make start.sh executable
-RUN chmod +x /start.sh
+# Install the dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Run start.sh when the container launches
-CMD ["/start.sh"]
+# Copy the rest of the project to the working directory
+COPY ./telegram .
+COPY ./fastapi_app/vpnworks ./fastapi_app/vpnworks

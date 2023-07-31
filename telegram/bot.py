@@ -10,9 +10,9 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode
 
 from fastapi_app.vpnworks.api import VpnWorksApi
-from telegram.config import BOT_API, CHAT_ID, START_MSG
-from telegram.keyboards import main_keyboard
-from telegram.users_handler import User
+from config import BOT_API, CHAT_ID, START_MSG
+from keyboards import main_keyboard
+from users_handler import User
 
 bot = aiogram.Bot(token=BOT_API, parse_mode=ParseMode.HTML)
 dp = aiogram.Dispatcher(bot, storage=MemoryStorage())

@@ -1,3 +1,5 @@
 /output
 /venv
 .gitignore
+fastapi_app/db
+fastapi_app/alembic
