@@ -15,6 +15,7 @@ class VpnWorksApi:
             **self._base_headers,
             'Accept': 'application/json',
         }
+        self.client = httpx.AsyncClient(verify=False)
 
     @property
     async def token(self):
@@ -27,29 +28,28 @@ class VpnWorksApi:
         self._token = value
 
     async def _get_token(self):
-        async with httpx.AsyncClient() as client:
-            resp = await client.post(f'{self.base_url}/token')
-            resp.raise_for_status()
-            data = resp.json()
-            self._token = data['Token']
-            self.user_headers['Authorization'] = f'Bearer {self._token}'
-            self.config_headers['Authorization'] = f'Bearer {self._token}'
+        resp = await self.client.post(f'{self.base_url}/token')
+        resp.raise_for_status()
+        data = resp.json()
+        self._token = data['Token']
+        self.user_headers['Authorization'] = f'Bearer {self._token}'
+        self.config_headers['Authorization'] = f'Bearer {self._token}'
 
     @retry(stop=stop_after_attempt(3))
     async def _make_request(self, endpoint, req_type='get', headers=None):
         headers = headers or self.user_headers
-        async with httpx.AsyncClient() as client:
-            method = getattr(client, req_type)
-            resp = await method(f'{self.base_url}/{endpoint}', headers=headers)
-            if resp.status_code == 401:
-                await self._get_token()
-                return await self._make_request(
-                    endpoint,
-                    req_type=req_type,
-                    headers=headers,
-                )
-            resp.raise_for_status()
-            return resp
+        method = getattr(self.client, req_type)
+        resp = await method(f'{self.base_url}/{endpoint}', headers=headers)
+        if resp.status_code == 401:
+            await self._get_token()
+            headers['Authorization'] = f'Bearer {self._token}'
+            return await self._make_request(
+                endpoint,
+                req_type=req_type,
+                headers=headers,
+            )
+        resp.raise_for_status()
+        return resp
 
     async def get_users(self):
         response = await self._make_request('user')
