@@ -1,46 +1,24 @@
-import functools
 import logging
 import os
 
 import aiogram
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Text
-from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.types import ParseMode
+from aiogram import Bot, F, Router
+from aiogram.filters import CommandStart
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import FSInputFile
 
-from config import BOT_API, CHAT_ID, START_MSG
-from telegram.keyboards import main_keyboard
-from telegram.users_handler import User
+from config import START_MSG
+from telegram.filters.custom_filter import IsAdmin
+from telegram.keyboards.keyboards import main_keyboard
+from telegram.utils import User
 from vpnworks.api import VpnWorksApi
 
-bot = aiogram.Bot(token=BOT_API, parse_mode=ParseMode.HTML)
-dp = aiogram.Dispatcher(bot, storage=MemoryStorage())
-
 logger = logging.getLogger(__name__)
-
 client = VpnWorksApi()
+router = Router()
 
-
-def restricted(func):
-    """
-    Decorator to restrict the execution of a command only to
-     a user with a certain ID.
-
-    Args:
-        func (function): The function to be decorated.
-
-    Returns:
-        function: The decorated function.
-    """
-
-    @functools.wraps(func)
-    async def wrapped(message: aiogram.types.Message, *args, **kwargs):
-        if message.from_user.id != CHAT_ID:
-            return
-        return await func(message, *args, **kwargs)
-
-    return wrapped
+router.message.filter(IsAdmin())
 
 
 class DeleteUserState(StatesGroup):
@@ -51,8 +29,7 @@ class DeleteUserState(StatesGroup):
     waiting_for_user_id = State()
 
 
-@dp.message_handler(commands=['start'])
-@restricted
+@router.message(CommandStart())
 async def start(message: aiogram.types.Message):
     """
     The handler for the 'start' command. Sends a greeting message to the user.
@@ -64,8 +41,7 @@ async def start(message: aiogram.types.Message):
     logger.info(f'User {message.from_user.id} started bot')
 
 
-@dp.message_handler(Text(equals='🔐 Make config'))
-@restricted
+@router.message(F.text == '🔐 Make config')
 async def get_config(message: aiogram.types.Message):
     """
     The handler for the 'Make config' command. Sends a
@@ -85,22 +61,24 @@ async def get_config(message: aiogram.types.Message):
         f'\n{person_desc}'
     )
     try:
-        with open(filename, 'rb') as file:
-            await message.answer_document(file, caption=caption_message)
+        fs_input_file = FSInputFile(path=filename)
+
+        await message.answer_document(fs_input_file, caption=caption_message)
     except Exception as error:
         return await message.answer(str(error))
     os.remove(filename)
     logger.info(f'User {message.from_user.id} get config {filename}')
 
 
-@dp.message_handler(Text(equals='📝 Get users'))
-@restricted
-async def get_users(message: aiogram.types.Message):
+@router.message(F.text == '📝 Get users')
+async def get_users(message: aiogram.types.Message, bot: Bot):
     """
     The handler for the 'Get users' command. Sends a list of users to the user.
 
     Args:
         message (aiogram.types.Message): The message from the user.
+        :param message:
+        :param bot:
     """
     wait_message = await message.answer('Getting users...')
     user_data = await client.get_users()
@@ -142,27 +120,27 @@ async def get_users(message: aiogram.types.Message):
     logger.info(f'User {message.from_user.id} get users')
 
 
-@dp.message_handler(Text(equals='❌ Delete user'))
-@restricted
-async def start_delete_user(message: aiogram.types.Message):
+@router.message(F.text == '❌ Delete user')
+async def start_delete_user(message: aiogram.types.Message, state: FSMContext):
     """
     The handler for the 'Delete user' command. It asks the user to
     enter a user ID for deletion.
 
     Args:
         message (aiogram.types.Message): The message from the user.
+        :param message:
+        :param state:
     """
     try:
         await message.answer('Enter user ID')
-        await DeleteUserState.waiting_for_user_id.set()
+        await state.set_state(DeleteUserState.waiting_for_user_id)
         logger.info(f'User {message.from_user.id} start delete user')
     except Exception as e:
         await message.answer(f'Error: while start deleting user: {e}')
         logger.error(f'Error: while deleting user: {e}')
 
 
-@dp.message_handler(state=DeleteUserState.waiting_for_user_id)
-@restricted
+@router.message(DeleteUserState.waiting_for_user_id)
 async def delete_user_id(message: aiogram.types.Message, state: FSMContext):
     """
     The handler for the deletion of a user ID. It receives the ID from
@@ -181,6 +159,5 @@ async def delete_user_id(message: aiogram.types.Message, state: FSMContext):
     else:
         await message.answer('User not found')
         logger.info(f'User {message.from_user.id} not found user {user_id}')
-    await state.reset_state(with_data=True)
-    await state.finish()
+    await state.clear()
     logger.info(f'User {message.from_user.id} finish delete user')
