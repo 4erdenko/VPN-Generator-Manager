@@ -1,3 +1,7 @@
 /output
 /venv
 .gitignore
+__pycache__
+.idea
+.github
+README.MD
