@@ -2,15 +2,14 @@ import logging
 import os
 
 import aiogram
-from aiogram import Bot, F, Router
-from aiogram.filters import CommandStart
+from aiogram import Bot, Router
+from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import FSInputFile
 
 from config import START_MSG
 from telegram.filters.custom_filter import IsAdmin
-from telegram.keyboards.keyboards import main_keyboard
 from telegram.utils import User
 from vpnworks.api import VpnWorksApi
 
@@ -37,11 +36,11 @@ async def start(message: aiogram.types.Message):
     Args:
         message (aiogram.types.Message): The message from the user.
     """
-    await message.answer(START_MSG, reply_markup=main_keyboard)
+    await message.answer(START_MSG)
     logger.info(f'User {message.from_user.id} started bot')
 
 
-@router.message(F.text == '🔐 Make config')
+@router.message(Command(commands='make_config'))
 async def get_config(message: aiogram.types.Message):
     """
     The handler for the 'Make config' command. Sends a
@@ -70,7 +69,7 @@ async def get_config(message: aiogram.types.Message):
     logger.info(f'User {message.from_user.id} get config {filename}')
 
 
-@router.message(F.text == '📝 Get users')
+@router.message(Command(commands='get_users'))
 async def get_users(message: aiogram.types.Message, bot: Bot):
     """
     The handler for the 'Get users' command. Sends a list of users to the user.
@@ -120,7 +119,7 @@ async def get_users(message: aiogram.types.Message, bot: Bot):
     logger.info(f'User {message.from_user.id} get users')
 
 
-@router.message(F.text == '❌ Delete user')
+@router.message(Command(commands='delete_user'))
 async def start_delete_user(message: aiogram.types.Message, state: FSMContext):
     """
     The handler for the 'Delete user' command. It asks the user to
