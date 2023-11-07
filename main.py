@@ -7,6 +7,7 @@ from aiogram import Bot, Dispatcher
 
 from config import BOT_API
 from telegram.handlers import main_handler
+from telegram.keyboards.main_menu import set_main_menu
 
 
 async def main():
@@ -23,7 +24,7 @@ async def main():
     )
     bot = Bot(token=BOT_API, parse_mode='HTML')
     dp = Dispatcher()
-
+    await set_main_menu(bot)
     dp.include_router(main_handler.router)
 
     await bot.delete_webhook(drop_pending_updates=True)
