@@ -73,17 +73,41 @@ class VpnWorksApi:
 
     async def create_conf_file(self):
         data = await self._get_conf_file()
-        wireguard_config = data.get('WireguardConfig')
-        filename = wireguard_config.get('FileName')
-        file_content = wireguard_config.get('FileContent')
         username = data.get('UserName')
+        results: dict[str, str] = {
+            'username': username,
+            'amnezia': '',
+            'wireguard': '',
+            'outline': '',
+        }
 
-        if filename:
-            async with aiofiles.open(filename, 'w') as f:
-                await f.write(file_content)
-                return filename, username
-        else:
-            return 'No filename provided'
+        amnezia_config = data.get('AmnzOvcConfig')
+        if amnezia_config:
+            amnezia_filename = amnezia_config.get('FileName')
+            amnezia_file_content = amnezia_config.get('FileContent')
+            if amnezia_filename and amnezia_file_content:
+                async with aiofiles.open(amnezia_filename, 'w') as file:
+                    await file.write(amnezia_file_content)
+                results.update({'amnezia': amnezia_filename})
+
+        wireguard_config = data.get('WireguardConfig')
+        if wireguard_config:
+            wireguard_filename = wireguard_config.get('FileName')
+            wireguard_file_content = wireguard_config.get('FileContent')
+            if wireguard_filename and wireguard_file_content:
+                async with aiofiles.open(wireguard_filename, 'w') as f:
+                    await f.write(wireguard_file_content)
+                results.update({'wireguard': wireguard_filename})
+
+        outline_config = data.get('OutlineConfig')
+        if outline_config:
+            outline_key = outline_config.get('AccessKey')
+            if outline_key:
+                results.update({'outline': outline_key})
+
+        if not results:
+            return 'No configurations provided'
+        return results
 
     async def get_users_dict(self):
         users = await self.get_users()
