@@ -1,6 +1,14 @@
+import logging
+import os
 from datetime import datetime
 
+from aiogram import Bot
+from aiogram.types import FSInputFile, InputMediaDocument, Message
 from pytz import timezone
+
+from vpnworks.api import VpnWorksApi
+
+logger = logging.getLogger(__name__)
 
 
 def convert_date(date_str):
@@ -104,3 +112,36 @@ class User:
             f'{time_string}\n'
             f'--------------------------------------------------------\n'
         )
+
+
+async def send_configs(client: VpnWorksApi, message: Message, bot: Bot):
+
+    results = await client.create_conf_file()
+    outline_key = results.get('outline')
+    amnezia_filename = results.get('amnezia')
+    wireguard_filename = results.get('wireguard')
+    username = results.get('username')
+    users_dict = await client.get_users_dict()
+    person_name = users_dict.get(f'{username}').get('PersonName')
+    person_desc = users_dict.get(f'{username}').get('PersonDesc')
+    person_link = users_dict.get(f'{username}').get('PersonDescLink')
+
+    caption_message = (
+        f'Outline key:\n'
+        f'<code>{outline_key}</code>\n'
+        f'\n\n<a href="{person_link}">{person_name}</a>'
+        f'\n{person_desc}\n\n'
+        f'<code>{username}</code>'
+    )
+    media_group = [
+        InputMediaDocument(media=FSInputFile(amnezia_filename)),
+        InputMediaDocument(
+            media=FSInputFile(wireguard_filename), caption=caption_message
+        ),
+    ]
+
+    await bot.send_media_group(chat_id=message.chat.id, media=media_group)
+    os.remove(wireguard_filename)
+    os.remove(amnezia_filename)
+
+    logger.info(f'User {message.from_user.id} get configs of {username}')
