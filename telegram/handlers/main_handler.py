@@ -1,16 +1,14 @@
 import logging
-import os
 
 import aiogram
 from aiogram import Bot, Router
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import FSInputFile
 
 from config import START_MSG
 from telegram.filters.custom_filter import IsAdmin
-from telegram.utils import User
+from telegram.utils import User, send_configs
 from vpnworks.api import VpnWorksApi
 
 logger = logging.getLogger(__name__)
@@ -41,32 +39,17 @@ async def start(message: aiogram.types.Message):
 
 
 @router.message(Command(commands='make_config'))
-async def get_config(message: aiogram.types.Message):
+async def get_config(message: aiogram.types.Message, bot: Bot):
     """
     The handler for the 'Make config' command. Sends a
     configuration file to the user.
 
     Args:
         message (aiogram.types.Message): The message from the user.
+        :param message:
+        :param bot:
     """
-    filename, username = await client.create_conf_file()
-    users_dict = await client.get_users_dict()
-    person_name = users_dict.get(f'{username}').get('PersonName')
-    person_desc = users_dict.get(f'{username}').get('PersonDesc')
-    person_link = users_dict.get(f'{username}').get('PersonDescLink')
-    caption_message = (
-        f'<code>{username}</code>'
-        f'\n\n<a href="{person_link}">{person_name}</a>'
-        f'\n{person_desc}'
-    )
-    try:
-        fs_input_file = FSInputFile(path=filename)
-
-        await message.answer_document(fs_input_file, caption=caption_message)
-    except Exception as error:
-        return await message.answer(str(error))
-    os.remove(filename)
-    logger.info(f'User {message.from_user.id} get config {filename}')
+    await send_configs(client, message, bot)
 
 
 @router.message(Command(commands='get_users'))
