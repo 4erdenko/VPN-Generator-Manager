@@ -32,7 +32,7 @@ def check_credentials():
         missing_vars.append('BOT_API')
     if not CHAT_ID:
         missing_vars.append('CHAT_ID')
-    
+
     if missing_vars:
         raise ValueError(
             f'Missing environment variables: {", ".join(missing_vars)}. '

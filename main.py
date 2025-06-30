@@ -15,7 +15,7 @@ async def main():
     try:
         # Check credentials before starting
         check_credentials()
-        
+
         # Setup logging
         logging.basicConfig(
             level=logging.INFO,
@@ -28,14 +28,14 @@ async def main():
             isatty=True,
             stream=sys.stdout,
         )
-        
+
         logger = logging.getLogger(__name__)
         logger.info("Starting VPN Bot Manager...")
-        
+
         # Initialize bot and dispatcher
         bot = Bot(token=BOT_API, parse_mode='HTML')
         dp = Dispatcher()
-        
+
         # Setup menu and handlers
         await set_main_menu(bot)
         dp.include_router(main_handler.router)
@@ -44,7 +44,7 @@ async def main():
         await bot.delete_webhook(drop_pending_updates=True)
         logger.info("Bot started successfully")
         await dp.start_polling(bot)
-        
+
     except ValueError as e:
         logging.error(f"Configuration error: {e}")
         sys.exit(1)

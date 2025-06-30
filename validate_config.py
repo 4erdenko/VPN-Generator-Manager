@@ -15,23 +15,23 @@ def check_env_file():
         print("❌ .env file not found")
         print("   Create .env file using .env.example as template")
         return False
-    
+
     print("✅ .env file found")
-    
+
     # Check required variables
     required_vars = ['BOT_API', 'CHAT_ID']
     missing_vars = []
-    
+
     with open(env_path) as f:
         content = f.read()
         for var in required_vars:
             if f"{var}=" not in content or f"{var}=your_" in content:
                 missing_vars.append(var)
-    
+
     if missing_vars:
         print(f"❌ Missing or placeholder values for: {', '.join(missing_vars)}")
         return False
-    
+
     print("✅ Required environment variables are set")
     return True
 
@@ -41,7 +41,7 @@ def check_python_version():
         print(f"❌ Python {sys.version_info.major}.{sys.version_info.minor} is too old")
         print("   Python 3.9+ is required")
         return False
-    
+
     print(f"✅ Python {sys.version_info.major}.{sys.version_info.minor} is compatible")
     return True
 
@@ -62,15 +62,15 @@ def check_dependencies():
 def main():
     """Run all configuration checks."""
     print("🔍 Validating VPN Bot Manager configuration...\n")
-    
+
     checks = [
         check_python_version,
         check_dependencies,
         check_env_file,
     ]
-    
+
     results = [check() for check in checks]
-    
+
     print("\n" + "="*50)
     if all(results):
         print("🎉 Configuration is valid! You can start the bot.")

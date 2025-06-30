@@ -8,7 +8,7 @@ from tenacity import retry, stop_after_attempt
 
 class VpnWorksApi:
     """API client for VPN.works service."""
-    
+
     base_url = 'https://vpn.works'
 
     def __init__(self):
