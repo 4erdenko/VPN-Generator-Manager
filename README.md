@@ -1,6 +1,6 @@
 # VPN Bot Manager
 
-![Python](https://img.shields.io/badge/python-v3.9-blue)
+![Python](https://img.shields.io/badge/python-v3.9+-blue)
 ![Docker](https://img.shields.io/badge/docker-latest-blue)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2F4erdenko%2FVPN-Generator-Manager%2Fbadge&style=flat)](https://actions-badge.atrox.dev/4erdenko/VPN-Generator-Manager/goto)  
 This is a Telegram bot for managing VPN servers that you've received from the free VPN distribution service in Russia [VPNgen](https://vpngen.org/ru/#generator). If you're a VPN server manager (brigadier) from VPNgen, you can use this bot to manage your server users directly from Telegram.
@@ -45,18 +45,30 @@ If you want to run the bot on your local machine, follow these steps:
     pip install -r requirements.txt
     ```
 
-2. Create a `.env` file in the project's root directory with the following content:
-
-    ```text
-    BOT_API=your_bot_token
-    CHAT_ID=your_chat_id
-    START_MSG=your_welcome_message
-    ```
-
-3. Run the bot:
+2. Create a `.env` file in the project's root directory using the template:
 
     ```bash
-    python main.py
+    cp .env.example .env
+    ```
+
+    Then edit `.env` with your actual values:
+
+    ```text
+    BOT_API=your_actual_bot_token
+    CHAT_ID=your_actual_chat_id
+    START_MSG=Welcome to VPN Bot Manager!
+    ```
+
+3. Validate your configuration:
+
+    ```bash
+    python3 validate_config.py
+    ```
+
+4. Run the bot:
+
+    ```bash
+    python3 main.py
     ```
 
 ### Running in Docker
@@ -68,7 +80,7 @@ To run the bot inside a Docker container, make sure Docker is installed and runn
 3. Run the Docker containers:
     (inside project folder)
     ```bash
-    docker compuse up -d
+    docker compose up -d
     ```
 
 Here, we are mounting the `wireguard` directory from your local machine into the Docker container, so that the bot can access the `wg0.conf` file.
