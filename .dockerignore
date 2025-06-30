@@ -1,7 +1,31 @@
-/output
-/venv
-.gitignore
-__pycache__
-.idea
-.github
-README.MD
+# Development files
+.git/
+.github/
+.idea/
+.vscode/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.env
+.venv/
+venv/
+env/
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Temporary files
+output/
+*.log
+*.tmp
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS files
+.DS_Store
+Thumbs.db

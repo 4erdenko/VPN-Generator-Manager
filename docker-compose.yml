@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   wireguard:
-    image: linuxserver/wireguard
+    image: linuxserver/wireguard:latest
     container_name: wireguard
     restart: unless-stopped
     volumes:
@@ -11,6 +11,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
+      - TZ=UTC
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
@@ -20,15 +21,29 @@ services:
       - net.ipv6.conf.all.disable_ipv6=0
     networks:
       - backbone
+    healthcheck:
+      test: ["CMD", "ping", "-c", "1", "8.8.8.8"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   telegram_bot:
     build:
       context: .
-    container_name: TG_BOT
+      dockerfile: Dockerfile
+    container_name: vpn-bot-manager
     restart: unless-stopped
     network_mode: service:wireguard
     depends_on:
-      - wireguard
+      wireguard:
+        condition: service_healthy
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import sys; sys.exit(0)"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
 
 networks:
   backbone:

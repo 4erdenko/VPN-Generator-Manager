@@ -46,8 +46,7 @@ async def get_config(message: aiogram.types.Message, bot: Bot):
 
     Args:
         message (aiogram.types.Message): The message from the user.
-        :param message:
-        :param bot:
+        bot (Bot): The bot instance.
     """
     await send_configs(client, message, bot)
 
@@ -59,8 +58,7 @@ async def get_users(message: aiogram.types.Message, bot: Bot):
 
     Args:
         message (aiogram.types.Message): The message from the user.
-        :param message:
-        :param bot:
+        bot (Bot): The bot instance.
     """
     wait_message = await message.answer('Getting users...')
     user_data = await client.get_users()
@@ -110,8 +108,7 @@ async def start_delete_user(message: aiogram.types.Message, state: FSMContext):
 
     Args:
         message (aiogram.types.Message): The message from the user.
-        :param message:
-        :param state:
+        state (FSMContext): The finite state machine context.
     """
     try:
         await message.answer('Enter user ID')

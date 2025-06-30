@@ -1,21 +1,27 @@
+import logging
+from typing import Dict, List, Optional, Union
+
 import aiofiles
 import httpx
 from tenacity import retry, stop_after_attempt
 
 
 class VpnWorksApi:
+    """API client for VPN.works service."""
+    
     base_url = 'https://vpn.works'
 
     def __init__(self):
-        self._token = None
+        self._token: Optional[str] = None
         self._base_headers = {'Accept': 'application/json, text/plain, */*'}
         self.token_headers = self._base_headers
-        self.user_headers = self._base_headers
+        self.user_headers = self._base_headers.copy()
         self.config_headers = {
             **self._base_headers,
             'Accept': 'application/json',
         }
         self.client = httpx.AsyncClient(verify=False)
+        self.logger = logging.getLogger(__name__)
 
     @property
     async def token(self):
@@ -27,13 +33,19 @@ class VpnWorksApi:
     def token(self, value):
         self._token = value
 
-    async def _get_token(self):
-        resp = await self.client.post(f'{self.base_url}/token')
-        resp.raise_for_status()
-        data = resp.json()
-        self._token = data['Token']
-        self.user_headers['Authorization'] = f'Bearer {self._token}'
-        self.config_headers['Authorization'] = f'Bearer {self._token}'
+    async def _get_token(self) -> None:
+        """Get authentication token from VPN.works API."""
+        try:
+            resp = await self.client.post(f'{self.base_url}/token')
+            resp.raise_for_status()
+            data = resp.json()
+            self._token = data['Token']
+            self.user_headers['Authorization'] = f'Bearer {self._token}'
+            self.config_headers['Authorization'] = f'Bearer {self._token}'
+            self.logger.info("Successfully obtained authentication token")
+        except httpx.HTTPError as e:
+            self.logger.error(f"Failed to get token: {e}")
+            raise
 
     @retry(stop=stop_after_attempt(3))
     async def _make_request(self, endpoint, req_type='get', headers=None):
