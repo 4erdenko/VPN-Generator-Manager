@@ -120,6 +120,7 @@ async def send_configs(client: VpnWorksApi, message: Message, bot: Bot):
     outline_key = results.get('outline')
     amnezia_filename = results.get('amnezia')
     wireguard_filename = results.get('wireguard')
+    vless_key = results.get('vless')
     username = results.get('username')
     users_dict = await client.get_users_dict()
     person_name = users_dict.get(f'{username}').get('PersonName')
@@ -128,7 +129,9 @@ async def send_configs(client: VpnWorksApi, message: Message, bot: Bot):
 
     caption_message = (
         f'Outline key:\n'
-        f'<code>{outline_key}</code>\n'
+        f'<code>{outline_key}</code>\n\n'
+        f'VLESS key:\n'
+        f'<code>{vless_key}</code>\n'
         f'\n\n<a href="{person_link}">{person_name}</a>'
         f'\n{person_desc}\n\n'
         f'<code>{username}</code>'

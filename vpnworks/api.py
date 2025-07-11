@@ -91,6 +91,7 @@ class VpnWorksApi:
             'amnezia': '',
             'wireguard': '',
             'outline': '',
+            'vless': '',
         }
 
         amnezia_config = data.get('AmnzOvcConfig')
@@ -116,6 +117,12 @@ class VpnWorksApi:
             outline_key = outline_config.get('AccessKey')
             if outline_key:
                 results.update({'outline': outline_key})
+
+        vless_config = data.get('Proto0Config')
+        if vless_config:
+            vless_key = vless_config.get('AccessKey')
+            if vless_key:
+                results.update({'vless': vless_key})
 
         if not results:
             return 'No configurations provided'
